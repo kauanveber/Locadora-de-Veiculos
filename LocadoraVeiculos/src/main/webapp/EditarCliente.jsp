@@ -6,8 +6,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Processando Cadastro de Cliente</title>
-    <link rel="stylesheet" href="sua_folha_de_estilo.css">
+    <title>Atualizar Cliente</title>
     <style>
        
         body {
@@ -18,7 +17,7 @@
             align-items: center;
             min-height: 100vh;
         }
-        .container-feedback { 
+        .container-feedback {
             background-color: white;
             padding: 30px;
             border-radius: 10px;
@@ -61,57 +60,60 @@
             String cpf = request.getParameter("cpf");       
             String email = request.getParameter("email");
             String telefone = request.getParameter("telefone"); 
-            String endereco = request.getParameter("endereco");
+            String endereco = request.getParameter("endereco"); 
+            String idParam = request.getParameter("id");    
 
             String mensagem = "";
             String tipoMensagem = "";
+            int id = -1;
 
-            
-            if (nome == null || nome.isEmpty() ||
-                cpf == null || cpf.isEmpty() ||
-                email == null || email.isEmpty() ||
-                telefone == null || telefone.isEmpty() ||
-                endereco == null || endereco.isEmpty()) {
-                
-                mensagem = "Todos os campos obrigatórios devem ser preenchidos.";
+            try {
+                id = Integer.parseInt(idParam);
+            } catch (NumberFormatException e) {
+                mensagem = "ID do cliente inválido para edição.";
                 tipoMensagem = "error";
+            }
 
-            } else {
+            if (id != -1 && 
+                nome != null && !nome.isEmpty() &&
+                cpf != null && !cpf.isEmpty() &&
+                email != null && !email.isEmpty() &&
+                telefone != null && !telefone.isEmpty() &&
+                endereco != null && !endereco.isEmpty()) {
+                
                 try {
-                    
-                    Cliente cliente = new Cliente(nome, cpf, email, telefone, endereco);
-
-                    ClienteDAO clidao = new ClienteDAO();
-                    ClienteControler cliControler = new ClienteControler(clidao);
-
                    
-                    boolean sucesso = cliControler.inserir(cliente);
+                    Cliente c = new Cliente(nome, cpf, email, telefone, endereco);
+
+                    boolean sucesso = ClienteDAO.editarCliente(c, id); 
 
                     if (sucesso) {
-                        mensagem = "Cliente cadastrado com sucesso!";
+                        mensagem = "Cliente editado com sucesso!";
                         tipoMensagem = "success";
                     } else {
-                        
-                        mensagem = "Erro desconhecido ao cadastrar cliente. Tente novamente.";
+                        mensagem = "Erro ao editar cliente. Cliente não encontrado ou outro problema.";
                         tipoMensagem = "error";
                     }
                 } catch (RuntimeException e) {
-                   
-                    mensagem = "Erro ao cadastrar cliente: " + e.getMessage();
+                    mensagem = "Erro ao editar cliente: " + e.getMessage();
                     tipoMensagem = "error";
-                    System.err.println("ERRO NO CADASTRO JSP: " + e.getMessage()); 
+                    System.err.println("ERRO NA EDIÇÃO JSP (DAO): " + e.getMessage());
                 } catch (Exception e) {
-                    
-                    mensagem = "Ocorreu um erro inesperado: " + e.getMessage();
+                    mensagem = "Ocorreu um erro inesperado na edição: " + e.getMessage();
                     tipoMensagem = "error";
-                    System.err.println("ERRO INESPERADO NO CADASTRO JSP: " + e.getMessage()); 
+                    System.err.println("ERRO INESPERADO NA EDIÇÃO JSP: " + e.getMessage());
                 }
+
+            } else if (id != -1) { 
+                mensagem = "Preencha todos os campos para editar.";
+                tipoMensagem = "error";
             }
+            
         %>
         <div class="message <%= tipoMensagem %>">
             <%= mensagem %>
         </div>
-        <p><a href="cadastro.html">Voltar ao Cadastro</a></p>
+        <p><a href="index.html">Voltar ao Início</a></p>
         <p><a href="consulta.jsp">Ver Lista de Clientes</a></p>
     </div>
 </body>

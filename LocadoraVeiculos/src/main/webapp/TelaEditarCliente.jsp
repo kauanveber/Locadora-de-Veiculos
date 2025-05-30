@@ -1,9 +1,12 @@
+<%@page import="modelo.ClienteDAO"%>
+<%@page import="modelo.Cliente"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cadastro de Cliente</title>
+  <title>Editar Cliente</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
@@ -13,29 +16,26 @@
       box-sizing: border-box;
     }
 
-    body, html {
+    html, body {
       height: 100%;
       font-family: 'Montserrat', sans-serif;
-      color: white;
       overflow-x: hidden;
     }
 
-    
     body {
+      color: white;
       background: url('https://images.unsplash.com/photo-1605559424843-1f3e8cfe3f89?auto=format&fit=crop&w=1950&q=80') no-repeat center center/cover fixed;
       position: relative;
     }
 
-    
     body::before {
       content: "";
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background-color: rgba(0, 0, 0, 0.65);
-      z-index: 0;
+      z-index: 1;
     }
 
-    
     nav {
       position: fixed;
       top: 0;
@@ -45,7 +45,7 @@
       justify-content: center;
       gap: 40px;
       background: transparent;
-      z-index: 10;
+      z-index: 2;
     }
 
     nav a {
@@ -66,10 +66,9 @@
       transform: scale(1.05);
     }
 
-   
     .container {
       position: relative;
-      z-index: 5;
+      z-index: 10;
       margin: 100px auto 0;
       background-color: rgba(255, 255, 255, 0.95);
       color: #003566;
@@ -97,7 +96,7 @@
 
     form input[type="text"],
     form input[type="email"],
-    form input[type="tel"] { 
+    form input[type="tel"] {
       width: 100%;
       padding: 12px 15px;
       margin-top: 8px;
@@ -161,25 +160,52 @@
   </nav>
 
   <div class="container">
-    <h1>Cadastro de Cliente</h1>
-    <form action="cadastro.jsp" method="post">
+    <h1>Editar Cliente</h1>
+    <%
+        Cliente cliente = null;
+        String idParam = request.getParameter("id");
+        if (idParam != null && !idParam.isEmpty()) {
+            try {
+                int id = Integer.parseInt(idParam);
+                cliente = ClienteDAO.getClienteById(id); 
+            } catch (NumberFormatException e) {
+                out.println("<p style='color: red;'>Erro: ID de cliente inválido.</p>");
+                System.err.println("Erro TelaEditarCliente.jsp: ID inválido: " + e.getMessage());
+            } catch (RuntimeException e) {
+                out.println("<p style='color: red;'>Erro ao carregar cliente: " + e.getMessage() + "</p>");
+                System.err.println("Erro TelaEditarCliente.jsp (DAO): " + e.getMessage());
+            }
+        }
+
+        if (cliente != null) {
+    %>
+    <form action="EditarCliente.jsp" method="post">
+      <input type="hidden" name="id" value="<%= cliente.getId() %>" />
+
       <label for="nome">Nome:</label>
-      <input type="text" name="nome" id="nome" required />
+      <input type="text" name="nome" id="nome" value="<%= cliente.getNome() %>" required />
 
       <label for="cpf">CPF:</label>
-      <input type="text" name="cpf" id="cpf" required pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" placeholder="Ex: 123.456.789-00" title="Formato: 123.456.789-00" />
+      <input type="text" name="cpf" id="cpf" value="<%= cliente.getCpf() %>" required pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" placeholder="Ex: 123.456.789-00" title="Formato: 123.456.789-00" />
 
       <label for="email">Email:</label>
-      <input type="email" name="email" id="email" required />
+      <input type="email" name="email" id="email" value="<%= cliente.getEmail() %>" required />
 
       <label for="telefone">Telefone:</label>
-      <input type="tel" name="telefone" id="telefone" required pattern="\(\d{2}\)\d{4,5}-\d{4}" placeholder="Ex: (47)9999-8888" title="Formato: (XX)XXXXX-XXXX ou (XX)XXXX-XXXX" />
+      <input type="tel" name="telefone" id="telefone" value="<%= cliente.getTelefone() %>" required pattern="\(\d{2}\)\d{4,5}-\d{4}" placeholder="Ex: (47)9999-8888" title="Formato: (XX)XXXXX-XXXX ou (XX)XXXX-XXXX" />
 
       <label for="endereco">Endereço:</label>
-      <input type="text" name="endereco" id="endereco" required />
+      <input type="text" name="endereco" id="endereco" value="<%= cliente.getEndereco() %>" required />
 
-      <input type="submit" value="Cadastrar" />
+      <input type="submit" value="Salvar Alterações" />
     </form>
+    <%
+        } else if (idParam != null && !idParam.isEmpty()) { 
+            out.println("<p style='color: red;'>Cliente com ID " + idParam + " não encontrado.</p>");
+        } else { 
+            out.println("<p style='color: red;'>Nenhum ID de cliente fornecido para edição.</p>");
+        }
+    %>
   </div>
 </body>
 </html>

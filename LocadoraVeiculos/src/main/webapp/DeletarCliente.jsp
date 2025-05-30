@@ -6,8 +6,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Processando Cadastro de Cliente</title>
-    <link rel="stylesheet" href="sua_folha_de_estilo.css">
+    <title>Deletar Cliente</title>
     <style>
        
         body {
@@ -18,7 +17,7 @@
             align-items: center;
             min-height: 100vh;
         }
-        .container-feedback { 
+        .container-feedback {
             background-color: white;
             padding: 30px;
             border-radius: 10px;
@@ -57,61 +56,40 @@
 <body>
     <div class="container-feedback">
         <%
-            String nome = request.getParameter("nome");
-            String cpf = request.getParameter("cpf");       
-            String email = request.getParameter("email");
-            String telefone = request.getParameter("telefone"); 
-            String endereco = request.getParameter("endereco");
-
+            String idParam = request.getParameter("id");
             String mensagem = "";
             String tipoMensagem = "";
 
-            
-            if (nome == null || nome.isEmpty() ||
-                cpf == null || cpf.isEmpty() ||
-                email == null || email.isEmpty() ||
-                telefone == null || telefone.isEmpty() ||
-                endereco == null || endereco.isEmpty()) {
-                
-                mensagem = "Todos os campos obrigatórios devem ser preenchidos.";
-                tipoMensagem = "error";
-
-            } else {
+            if (idParam != null && !idParam.isEmpty()) {
                 try {
-                    
-                    Cliente cliente = new Cliente(nome, cpf, email, telefone, endereco);
-
-                    ClienteDAO clidao = new ClienteDAO();
-                    ClienteControler cliControler = new ClienteControler(clidao);
-
-                   
-                    boolean sucesso = cliControler.inserir(cliente);
+                    int id = Integer.parseInt(idParam);
+                    boolean sucesso = ClienteDAO.deletarCliente(id); 
 
                     if (sucesso) {
-                        mensagem = "Cliente cadastrado com sucesso!";
+                        mensagem = "Cliente deletado com sucesso!";
                         tipoMensagem = "success";
                     } else {
-                        
-                        mensagem = "Erro desconhecido ao cadastrar cliente. Tente novamente.";
+                        mensagem = "Erro ao deletar cliente. Cliente não encontrado ou outro problema.";
                         tipoMensagem = "error";
                     }
+                } catch (NumberFormatException e) {
+                    mensagem = "ID do cliente inválido.";
+                    tipoMensagem = "error";
+                    System.err.println("ERRO NO DELETAR JSP (ID inválido): " + e.getMessage());
                 } catch (RuntimeException e) {
-                   
-                    mensagem = "Erro ao cadastrar cliente: " + e.getMessage();
+                    mensagem = "Erro ao deletar cliente: " + e.getMessage();
                     tipoMensagem = "error";
-                    System.err.println("ERRO NO CADASTRO JSP: " + e.getMessage()); 
-                } catch (Exception e) {
-                    
-                    mensagem = "Ocorreu um erro inesperado: " + e.getMessage();
-                    tipoMensagem = "error";
-                    System.err.println("ERRO INESPERADO NO CADASTRO JSP: " + e.getMessage()); 
+                    System.err.println("ERRO NO DELETAR JSP (DAO): " + e.getMessage());
                 }
+            } else {
+                mensagem = "ID do cliente não fornecido.";
+                tipoMensagem = "error";
             }
         %>
         <div class="message <%= tipoMensagem %>">
             <%= mensagem %>
         </div>
-        <p><a href="cadastro.html">Voltar ao Cadastro</a></p>
+        <p><a href="index.html">Voltar ao Início</a></p>
         <p><a href="consulta.jsp">Ver Lista de Clientes</a></p>
     </div>
 </body>
